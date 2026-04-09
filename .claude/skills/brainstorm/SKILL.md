@@ -9,7 +9,7 @@ allowed-tools: Agent WebSearch WebFetch
 
 You are the **orchestrator** of a creative brainstorming session. Your job is to run a multi-agent swarm where each agent uses a different divergent thinking technique, then converge the results into actionable ideas.
 
-**Read [techniques.md](techniques.md) now** — it contains the full technique definitions and agent prompts you will need.
+**Start by reading [techniques/README.md](techniques/README.md)** — it's a lightweight index of all 13 available techniques with their tiers, flags, and file paths. Do NOT read the individual technique files yet — only load the ones you actually select in Phase 3.
 
 ## How This Works: The Double Diamond
 
@@ -39,32 +39,16 @@ If the user provided no arguments, ask them what they want to brainstorm.
 
 ## Phase 2: SELECT TECHNIQUES
 
-**If the user specified techniques:** Use those (any number they specified).
+Consult [techniques/README.md](techniques/README.md) for the full list of techniques, their flags, tiers, and problem-type guidance.
 
-**If auto-selecting (default):** Pick 5 techniques following these rules:
-- Include at least 2 S-tier techniques (Acid Test, Stoner Circle, Oblique Strategies)
-- Include at least 1 A-tier technique (Bad Idea Bonanza, Cross-Domain Transfer, Expert Panel, SCAMPER)
-- Include at least 1 research round (Biomimicry Safari, Time Machine, Cross-Domain Transfer)
-- Vary the selection each time — don't always pick the same 5
-- Consider the problem domain: technical problems benefit from SCAMPER and Biomimicry; people problems benefit from Expert Panel and Question Explosion; product problems benefit from Bad Ideas and Cross-Domain Transfer
+**If the user specified techniques via flags:** Use those (any number they specified).
 
-### Technique Quick Reference
-
-| # | Technique | Flag | Type | Tier |
-|---|-----------|------|------|------|
-| 1 | The Stoner Circle | `--stoner` | Imagination | S |
-| 2 | Bad Idea Bonanza | `--bad-ideas` | Imagination | A |
-| 3 | The Expert Panel | `--expert-panel` | Imagination | A |
-| 4 | Acid Test | `--acid` | Imagination | S |
-| 5 | Caveman First Principles | `--caveman` | Imagination | B |
-| 6 | Reverse Brainstorm | `--reverse` | Imagination | B |
-| 7 | Constraint Removal | `--constraint` | Imagination | C |
-| 8 | Oblique Strategies | `--oblique` | Imagination | S |
-| 9 | SCAMPER | `--scamper` | Imagination | A |
-| 10 | Question Explosion | `--questions` | Imagination | B |
-| 11 | Biomimicry Safari | `--biomimicry` | Research | B |
-| 12 | Time Machine | `--time-machine` | Research | C |
-| 13 | Cross-Domain Transfer | `--cross-domain` | Research | A |
+**If auto-selecting (default):** Pick 5 techniques following the rules in the index:
+- At least 2 S-tier techniques
+- At least 1 A-tier technique
+- At least 1 research round
+- Vary the selection across sessions
+- Match techniques to problem type per the guidance in the index
 
 ---
 
@@ -72,24 +56,31 @@ If the user provided no arguments, ask them what they want to brainstorm.
 
 **This is the critical step.** Launch ALL selected technique agents IN PARALLEL using the Agent tool. Each agent must be completely independent — they should have ZERO context from each other.
 
-For each agent, construct the prompt by:
-1. Copying the **Agent Prompt** section for that technique from techniques.md
-2. Replacing `{problem}` with the user's problem statement
-3. Setting `description` to the technique name (e.g., "Stoner Circle brainstorm")
+**Step 3a — Load the selected techniques:**
+Read ONLY the files for the techniques you selected (not all 13). The file paths are in [techniques/README.md](techniques/README.md). For example, if you selected Stoner Circle, read `techniques/stoner-circle.md`.
+
+**Step 3b — Construct each agent's prompt:**
+For each selected technique:
+1. Take the entire content of the "Agent Prompt" section from that technique's file
+2. Replace the `{problem}` placeholder with the user's problem statement
+3. Use the resulting string as the `prompt` parameter to the Agent tool
+4. Set `description` to the technique name (e.g., "Stoner Circle brainstorm")
+
+**Step 3c — Launch all agents in parallel:**
+Make all Agent tool calls in a **single message** so they execute concurrently. Do NOT launch them sequentially — the whole point of the swarm is parallelism and independence.
 
 **Important agent configuration:**
 - For **Research rounds** (Biomimicry, Time Machine, Cross-Domain Transfer): The agent will need web search access. These agents should use WebSearch to find real examples.
 - For **Imagination rounds**: No web access needed. Pure creative output.
-- Launch all agents in a **single message** with multiple Agent tool calls so they run in parallel.
 - Each agent should produce **5+ raw ideas**, unfiltered and in the voice/persona of their technique.
 
-**Example of launching 5 agents in parallel:**
+**Example of launching 5 agents in parallel (single message, multiple tool calls):**
 ```
-Agent({ description: "Stoner Circle brainstorm", prompt: "[full technique prompt with problem inserted]" })
-Agent({ description: "Acid Test brainstorm", prompt: "[full technique prompt with problem inserted]" })
-Agent({ description: "Bad Idea Bonanza brainstorm", prompt: "[full technique prompt with problem inserted]" })
-Agent({ description: "Biomimicry Safari brainstorm", prompt: "[full technique prompt with problem inserted]" })
-Agent({ description: "Expert Panel brainstorm", prompt: "[full technique prompt with problem inserted]" })
+Agent({ description: "Stoner Circle brainstorm", prompt: "<contents of stoner-circle.md agent prompt with {problem} replaced>" })
+Agent({ description: "Acid Test brainstorm", prompt: "<contents of acid-test.md agent prompt with {problem} replaced>" })
+Agent({ description: "Bad Idea Bonanza brainstorm", prompt: "<contents of bad-idea-bonanza.md agent prompt with {problem} replaced>" })
+Agent({ description: "Biomimicry Safari brainstorm", prompt: "<contents of biomimicry-safari.md agent prompt with {problem} replaced>" })
+Agent({ description: "Expert Panel brainstorm", prompt: "<contents of expert-panel.md agent prompt with {problem} replaced>" })
 ```
 
 ---

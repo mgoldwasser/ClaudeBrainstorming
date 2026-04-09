@@ -1,7 +1,7 @@
 ---
 name: brainstorm
-description: "Creative brainstorming using a multi-agent swarm. Launches parallel agents using divergent thinking techniques (stoner circle, biomimicry, reverse brainstorm, acid test, etc.) then converges into actionable ideas. Use when you need to generate creative, unconventional ideas for any problem."
-argument-hint: "[--technique-names] <problem or topic to brainstorm>"
+description: Creative brainstorming using a multi-agent swarm. Launches parallel agents with divergent thinking techniques (stoner circle, biomimicry, acid test, etc.) then converges into actionable ideas. Use when generating creative ideas for a problem.
+argument-hint: [--technique-names] <problem or topic to brainstorm>
 allowed-tools: Agent WebSearch WebFetch
 ---
 

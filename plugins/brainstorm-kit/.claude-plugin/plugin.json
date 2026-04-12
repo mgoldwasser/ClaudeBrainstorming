@@ -1,0 +1,17 @@
+{
+  "name": "brainstorm-kit",
+  "description": "Multi-agent brainstorming swarm. Spawns parallel agents running 13 divergent-thinking techniques (stoner circle, biomimicry, acid test, SCAMPER, etc.), then converges output into a ranked harvest of actionable ideas.",
+  "version": "1.0.0",
+  "author": {
+    "name": "mgoldwasser"
+  },
+  "homepage": "https://github.com/mgoldwasser/ClaudeBrainstorming",
+  "repository": "https://github.com/mgoldwasser/ClaudeBrainstorming",
+  "keywords": [
+    "brainstorming",
+    "creativity",
+    "divergent-thinking",
+    "ideation",
+    "multi-agent"
+  ]
+}

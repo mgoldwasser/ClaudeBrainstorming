@@ -1,0 +1,20 @@
+{
+  "name": "brainstorming",
+  "owner": {
+    "name": "mgoldwasser"
+  },
+  "metadata": {
+    "description": "Creative brainstorming plugins for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "brainstorm-kit",
+      "source": "./plugins/brainstorm-kit",
+      "description": "Multi-agent brainstorming swarm with 13 divergent-thinking techniques",
+      "version": "1.0.0",
+      "category": "productivity",
+      "tags": ["brainstorming", "creativity", "ideation", "agents"]
+    }
+  ]
+}

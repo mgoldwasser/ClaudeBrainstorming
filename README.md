@@ -1,69 +1,87 @@
 # ClaudeBrainstorming
 
-A Claude Code skill that turns brainstorming into a multi-agent swarm. Launches parallel agents — each running a different divergent-thinking technique (stoner circle, biomimicry, acid test, SCAMPER, etc.) — then converges the raw output into a ranked harvest of actionable ideas.
+A Claude Code plugin that turns brainstorming into a multi-agent swarm. Launches parallel agents — each running a different divergent-thinking technique (stoner circle, biomimicry, acid test, SCAMPER, etc.) — then converges the raw output into a ranked harvest of actionable ideas.
 
-Invoke it with `/brainstorm <problem>` or let Claude trigger it automatically when you ask for creative ideas.
+This repo doubles as both a **plugin** (`brainstorm-kit`) and a **marketplace** (`brainstorming`) that hosts it.
 
 ## Installation
 
-Claude Code skills are just files in a `.claude/skills/<name>/` directory — no build step, no package manager. Pick the scope you want:
+Pick one of three install paths depending on how much you want to commit.
 
-### Option 1 — Global (all your projects)
+### Option 1 — Marketplace install (recommended)
 
-Install to your personal skills folder so it works everywhere on your machine:
+The closest thing Claude Code has to `pip install`. Inside a Claude Code session:
 
-```bash
-mkdir -p ~/.claude/skills
-cp -r .claude/skills/brainstorm ~/.claude/skills/
+```
+/plugin marketplace add mgoldwasser/ClaudeBrainstorming
+/plugin install brainstorm-kit@brainstorming
 ```
 
-Or, if you want updates from this repo to flow automatically, symlink it:
+That registers this repo as a marketplace and installs the `brainstorm-kit` plugin from it. The plugin is available in every Claude Code session afterward, and `/plugin marketplace update` will pull new techniques/fixes when you want them.
 
-```bash
-mkdir -p ~/.claude/skills
-ln -s "$(pwd)/.claude/skills/brainstorm" ~/.claude/skills/brainstorm
+Invoke it with the namespaced skill name:
+
+```
+/brainstorm-kit:brainstorm how to reduce user churn
 ```
 
-Then `git pull` in this repo to get new techniques or fixes.
+> Plugin skills are always namespaced (`<plugin>:<skill>`) to avoid conflicts between plugins.
 
-### Option 2 — Per-project (only this repo)
+### Option 2 — Local plugin (for development or private use)
 
-The skill is already at `.claude/skills/brainstorm/` in this repo, so anyone who clones this project gets it automatically when they open Claude Code here. Nothing to install.
-
-To add it to a different project you already have checked out:
+Clone this repo and point Claude Code at the plugin directory:
 
 ```bash
-mkdir -p /path/to/other-project/.claude/skills
-cp -r .claude/skills/brainstorm /path/to/other-project/.claude/skills/
+git clone https://github.com/mgoldwasser/ClaudeBrainstorming
+claude --plugin-dir ./ClaudeBrainstorming/plugins/brainstorm-kit
 ```
 
-Commit `.claude/skills/brainstorm/` into that project's repo if you want it shared with the team.
+Same namespaced invocation as Option 1.
+
+### Option 3 — Standalone skill (no plugin, unnamespaced)
+
+If you don't want the plugin namespace and just want `/brainstorm <problem>` directly, copy the skill files to your personal skills folder:
+
+```bash
+git clone https://github.com/mgoldwasser/ClaudeBrainstorming /tmp/cb
+cp -r /tmp/cb/plugins/brainstorm-kit/skills/brainstorm ~/.claude/skills/
+rm -rf /tmp/cb
+```
+
+Or symlink to keep it updated via `git pull`:
+
+```bash
+git clone https://github.com/mgoldwasser/ClaudeBrainstorming ~/src/ClaudeBrainstorming
+ln -s ~/src/ClaudeBrainstorming/plugins/brainstorm-kit/skills/brainstorm ~/.claude/skills/brainstorm
+```
+
+Then invoke without the namespace:
+
+```
+/brainstorm how to reduce user churn
+```
 
 ### Verify it's installed
 
-In Claude Code, run:
-
-```
-/brainstorm how to make meetings less painful
-```
-
-Or ask Claude "what skills are available?" — you should see `brainstorm` in the list.
+In a Claude Code session, ask "what skills are available?" — you should see `brainstorm-kit:brainstorm` (plugin install) or `brainstorm` (standalone install) in the list.
 
 ## Usage
 
 ```
-/brainstorm <problem or topic>
+/brainstorm-kit:brainstorm <problem or topic>
 ```
 
-By default, Claude auto-selects 5 techniques (biased toward the most divergent). You can override:
+(Or `/brainstorm <problem>` if you installed standalone.)
+
+By default, Claude auto-selects 5 techniques biased toward the most divergent. Override with flags:
 
 ```
-/brainstorm --stoner --biomimicry --reverse how to reduce user churn
+/brainstorm-kit:brainstorm --stoner --biomimicry --reverse how to reduce user churn
 ```
 
 Available technique flags: `--stoner`, `--acid`, `--bad-ideas`, `--expert-panel`, `--caveman`, `--reverse`, `--constraint`, `--oblique`, `--scamper`, `--questions`, `--biomimicry`, `--time-machine`, `--cross-domain`.
 
-See [.claude/skills/brainstorm/techniques/README.md](.claude/skills/brainstorm/techniques/README.md) for the full technique index with tier rankings and problem-type guidance.
+See [plugins/brainstorm-kit/skills/brainstorm/techniques/README.md](plugins/brainstorm-kit/skills/brainstorm/techniques/README.md) for the full technique index with tier rankings and problem-type guidance.
 
 ## How it works
 
@@ -74,12 +92,33 @@ See [.claude/skills/brainstorm/techniques/README.md](.claude/skills/brainstorm/t
 
 The multi-agent architecture matters: each agent starts with zero context from the others, so no anchoring bias. You get genuinely diverse output instead of five variations on the first idea.
 
-## Making your own skill installable
+## Repository structure
 
-Same pattern works for any skill you build:
+```
+ClaudeBrainstorming/
+├── .claude-plugin/
+│   └── marketplace.json          # Marketplace catalog (lists brainstorm-kit)
+├── plugins/
+│   └── brainstorm-kit/
+│       ├── .claude-plugin/
+│       │   └── plugin.json       # Plugin manifest
+│       └── skills/
+│           └── brainstorm/
+│               ├── SKILL.md      # Orchestrator skill
+│               └── techniques/   # 13 technique agent prompts + index
+└── README.md
+```
 
-1. Create `.claude/skills/<your-skill>/SKILL.md` with YAML frontmatter (`name`, `description`, optional `argument-hint`, `allowed-tools`)
-2. Add supporting files in the same directory and reference them from SKILL.md
-3. Commit to a repo for per-project use, or copy/symlink to `~/.claude/skills/` for global use
+## Making your own plugin installable
 
-Full spec: [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills).
+Same pattern works for any skill you want to distribute:
+
+1. Create `<your-plugin>/.claude-plugin/plugin.json` with `name`, `description`, `version`
+2. Put skills under `<your-plugin>/skills/<skill-name>/SKILL.md`
+3. Create `.claude-plugin/marketplace.json` at the repo root listing your plugin(s) with a relative `source` path
+4. Push to GitHub. Users install with `/plugin marketplace add <owner>/<repo>` then `/plugin install <plugin>@<marketplace>`
+
+Full spec:
+- Skills: [code.claude.com/docs/en/skills](https://code.claude.com/docs/en/skills)
+- Plugins: [code.claude.com/docs/en/plugins](https://code.claude.com/docs/en/plugins)
+- Marketplaces: [code.claude.com/docs/en/plugin-marketplaces](https://code.claude.com/docs/en/plugin-marketplaces)
